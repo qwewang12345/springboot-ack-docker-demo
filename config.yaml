@@ -1,0 +1,37 @@
+Service:
+  RegionId: cn-hangzhou
+  DeployType: ros
+  DeployMetadata:
+    ServiceInstanceNameRule:
+      Prefix: spring-boot
+    SupplierDeployMetadata:
+      AcrImageArtifactRelation:
+        '{{ computenest::acrimage::springBootDemo }}':
+          ArtifactId: ${Artifact.Artifact_1.ArtifactId}
+          ArtifactVersion: ${Artifact.Artifact_1.ArtifactVersion}
+    TemplateConfigs:
+      - Name: 新建ack部署docker模版
+        Url: 'templates/template.yaml'
+        AllowedRegions: []
+  ServiceType: private
+  ServiceInfo:
+    Locale: zh-CN
+    ShortDescription: spring boot demo，新建ack集群，并以docker的方式部署spring boot应用
+    Image: 'icons/service_logo.png'
+    Name: SpringBoot服务示例(ack+docker版本)
+  ShareType: Public
+  ApprovalType: Manual
+Artifact:
+  Artifact_1:
+    ArtifactType: AcrImage
+    ArtifactName: spring-boot-demo
+    Description: spring-boot-demo
+    ArtifactProperty:
+      RepoName: ${AcrImageBuilder.AcrImage_1.RepoName}
+      Tag: ${AcrImageBuilder.AcrImage_1.Tag}
+AcrImageBuilder:
+  AcrImage_1:
+    DockerFilePath: 'docker/Dockerfile'
+    RepoName: spring-boot-demo
+    Tag: v1.0
+

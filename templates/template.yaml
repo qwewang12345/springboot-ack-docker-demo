@@ -1,0 +1,430 @@
+ROSTemplateFormatVersion: '2015-09-01'
+Description:
+  en: 新建ack部署
+  zh-cn: new ack
+Parameters:
+  PayType:
+    Type: String
+    Label:
+      en: ECS Instance Charge Type
+      zh-cn: 付费类型
+    Default: PostPaid
+    AllowedValues:
+      - PostPaid
+      - PrePaid
+    AssociationProperty: ChargeType
+    AssociationPropertyMetadata:
+      LocaleKey: InstanceChargeType
+  PayPeriodUnit:
+    Type: String
+    Label:
+      en: Pay Period Unit
+      zh-cn: 购买资源时长周期
+    Default: Month
+    AllowedValues:
+      - Month
+      - Year
+    AssociationProperty: PayPeriodUnit
+    AssociationPropertyMetadata:
+      Visible:
+        Condition:
+          'Fn::Not':
+            'Fn::Equals':
+              - '${PayType}'
+              - PostPaid
+  PayPeriod:
+    Type: Number
+    Description:
+      en: >-
+        When the resource purchase duration is Month, the value of Period ranges
+        from 1 to 9, 12, 24, 36, 48, or 60. <br><b><font color='red'> When ECS
+        instance types are PrePaid valid </b></font>
+      zh-cn: >-
+        当购买资源时长为Month时，Period取值：1~9 <br><b><font
+        color='red'>当ECS实例类型为PrePaid有效</b></font>
+    Label:
+      en: Period
+      zh-cn: 购买资源时长
+    Default: 1
+    AllowedValues:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+      - 9
+    AssociationProperty: PayPeriod
+    AssociationPropertyMetadata:
+      Visible:
+        Condition:
+          'Fn::Not':
+            'Fn::Equals':
+              - '${PayType}'
+              - PostPaid
+  ZoneId:
+    Type: String
+    AssociationProperty: 'ALIYUN::ECS::Instance:ZoneId'
+    Label:
+      en: Zone ID
+      zh-cn: 可用区
+    Default: cn-hangzhou-h
+  VpcCidrBlock:
+    Type: String
+    Label:
+      en: VPC CIDR IPv4 Block
+      zh-cn: 专有网络IPv4网段
+    Description:
+      zh-cn: >-
+        VPC的ip地址段范围，<br>您可以使用以下的ip地址段或其子网:<br><font
+        color='green'>[10.0.0.0/8]</font><br><font
+        color='green'>[172.16.0.0/12]</font><br><font
+        color='green'>[192.168.0.0/16]</font>
+      en: >-
+        The ip address range of the VPC in the CidrBlock form; <br>You can use
+        the following ip address ranges and their subnets: <br><font
+        color='green'>[10.0.0.0/8]</font><br><font
+        color='green'>[172.16.0.0/12]</font><br><font
+        color='green'>[192.168.0.0/16]</font>
+    Default: 192.168.0.0/16
+    AssociationProperty: 'ALIYUN::VPC::VPC::CidrBlock'
+  VSwitchCidrBlock:
+    Type: String
+    Label:
+      en: VSwitch CIDR Block
+      zh-cn: 交换机子网网段
+    Description:
+      zh-cn: 必须属于VPC的子网段。
+      en: Must belong to the subnet segment of VPC.
+    Default: 192.168.1.0/24
+    AssociationProperty: 'ALIYUN::VPC::VSwitch::CidrBlock'
+    AssociationPropertyMetadata:
+      VpcCidrBlock: VpcCidrBlock
+  LoginPassword:
+    NoEcho: true
+    Type: String
+    Description:
+      en: >-
+        Server login password, Length 8-30, must contain three(Capital letters,
+        lowercase letters, numbers, ()`~!@#$%^&*_-+=|{}[]:;<>,.?/ Special symbol
+        in)
+      zh-cn: >-
+        服务器登录密码,长度8-30，必须包含三项（大写字母、小写字母、数字、 ()`~!@#$%^&*_-+=|{}[]:;<>,.?/
+        中的特殊符号）
+    Label:
+      en: Instance Password
+      zh-cn: 实例密码
+    ConstraintDescription:
+      en: >-
+        Length 8-30, must contain three(Capital letters, lowercase letters,
+        numbers, ()`~!@#$%^&*_-+=|{}[]:;<>,.?/ Special symbol in)
+      zh-cn: '长度8-30，必须包含三项（大写字母、小写字母、数字、 ()`~!@#$%^&*_-+=|{}[]:;<>,.?/ 中的特殊符号）'
+    AssociationProperty: 'ALIYUN::ECS::Instance::Password'
+    AllowedPattern: '^[a-zA-Z0-9-\(\)\`\~\!\@\#\$\%\^\&\*\_\-\+\=\|\{\}\[\]\:\;\<\>\,\.\?\/]*$'
+    MinLength: 8
+    MaxLength: 30
+    Default: computenest*12345
+  WorkerInstanceType:
+    Type: String
+    Label:
+      en: Worker Nodes Types
+      zh-cn: Worker节点规格
+    AssociationProperty: 'ALIYUN::ECS::Instance::InstanceType'
+    AssociationPropertyMetadata:
+      ZoneId: '${ZoneId}'
+    Default: ecs.g6.large
+  WorkerSystemDiskCategory:
+    Type: String
+    AllowedValues:
+      - cloud_efficiency
+      - cloud_ssd
+      - cloud_essd
+    AssociationPropertyMetadata:
+      LocaleKey: DiskCategory
+      InstanceType: '${WorkerInstanceType}'
+    Label:
+      en: Worker System Disk Category
+      zh-cn: Worker 系统盘磁盘类型
+    Default: cloud_essd
+  WorkerSystemDiskSize:
+    Type: Number
+    Label:
+      en: Worker System Disk Size(GB)
+      zh-cn: Worker节点系统盘大小(GB)
+    MinValue: 1
+    Default: 120
+  PodCidr:
+    Type: String
+    Description:
+      zh-cn: >-
+        请填写有效的私有网段，即以下网段及其子网：10.0.0.0/8，172.16-31.0.0/12-16，192.168.0.0/16<br>不能与
+        VPC 及 VPC 内已有 Kubernetes 集群使用的网段重复。<font
+        color='blue'><b>创建成功后不能修改</b></font>
+      en: >-
+        Please fill in a valid private segment, i.e. the following segments and
+        their subnets: 10.0.0.0/8, 172.16-31.0.0/12-16, 192.168.0.0/16<br> which
+        cannot duplicate the network segments already used by clusters in VPC
+        and VPC Kunetberes. <font color='blue'><b>Cannot be modified after
+        successful creation</b></font>
+    Label:
+      zh-cn: Pod 网络 CIDR
+      en: Pod Network CIDR
+    AssociationProperty: 'ALIYUN::CS::ManagedKubernetesCluster::PodCidr'
+    Default: 10.0.0.0/16
+  ServiceCidr:
+    Type: String
+    Description:
+      zh-cn: >-
+        可选范围：10.0.0.0/16-24，172.16-31.0.0/16-24，192.168.0.0/16-24<br>不能与 VPC 及
+        VPC 内已有 Kubernetes 集群使用的网段重复。<font color='blue'><b>创建成功后不能修改</b></font>
+      en: >-
+        Optional range: 10.0.0.0/16-24, 172.16-31.0.0/16-24,
+        192.168.0.0/16-24<br> cannot duplicate segments already used by existing
+        Kubernetes clusters in VPC and VPC.<font color='blue'><b>Cannot be
+        modified after successful creation</b></font>
+    Label:
+      zh-cn: Service CIDR
+      en: Service CIDR
+    AssociationProperty: 'ALIYUN::CS::ManagedKubernetesCluster::ServiceCidr'
+    Default: 172.16.0.0/16
+  LoadBalancerSpec:
+    Type: String
+    AssociationProperty: ALIYUN::SLB::Instance::InstanceType
+    Label:
+      en: Specifications
+      zh-cn: 规格
+    Default: slb.s1.small
+Resources:
+  EcsVpc:
+    Type: 'ALIYUN::ECS::VPC'
+    Properties:
+      VpcName:
+        Ref: 'ALIYUN::StackName'
+      CidrBlock:
+        Ref: VpcCidrBlock
+  EcsVSwitch:
+    Type: 'ALIYUN::ECS::VSwitch'
+    Properties:
+      VSwitchName:
+        Ref: 'ALIYUN::StackName'
+      VpcId:
+        Ref: EcsVpc
+      ZoneId:
+        Ref: ZoneId
+      CidrBlock:
+        Ref: VSwitchCidrBlock
+  # 新建负载均衡
+  Slb:
+    Type: ALIYUN::SLB::LoadBalancer
+    Properties:
+      LoadBalancerName:
+        Ref: ALIYUN::StackName
+      PayType:
+        Ref: PayType
+      PricingCycle:
+        Ref: PayPeriodUnit
+      Duration:
+        Ref: PayPeriod
+      VpcId:
+        Ref: EcsVpc
+      VSwitchId:
+        Ref: EcsVSwitch
+      LoadBalancerSpec:
+        Ref: LoadBalancerSpec
+      AddressType: intranet
+  # 新建eip
+  EipSlbAddress:
+    Type: ALIYUN::VPC::EIP
+    Properties:
+      Name:
+        Ref: ALIYUN::StackName
+      InternetChargeType: PayByTraffic
+      Bandwidth: 100
+  # 绑定eip到负载均衡
+  EipSlbAddressAssociation:
+    Type: ALIYUN::VPC::EIPAssociation
+    Properties:
+      InstanceId:
+        Ref: Slb
+      AllocationId:
+        Ref: EipSlbAddress
+  EcsSecurityGroup:
+    Type: 'ALIYUN::ECS::SecurityGroup'
+    Properties:
+      SecurityGroupName:
+        Ref: 'ALIYUN::StackName'
+      VpcId:
+        Ref: EcsVpc
+      SecurityGroupEgress:
+        - PortRange: '-1/-1'
+          Priority: 1
+          IpProtocol: all
+          DestCidrIp: 0.0.0.0/0
+          NicType: intranet
+      SecurityGroupIngress:
+        - PortRange: '-1/-1'
+          Priority: 1
+          IpProtocol: all
+          SourceCidrIp:
+            Ref: PodCidr
+          Description: pod网络访问开放
+          NicType: intranet
+        - PortRange: '-1/-1'
+          Priority: 1
+          IpProtocol: all
+          SourceCidrIp:
+            Ref: VpcCidrBlock
+          Description: vpc网络访问开放
+          NicType: intranet
+        - PortRange: '-1/-1'
+          Priority: 1
+          IpProtocol: icmp
+          SourceCidrIp: 0.0.0.0/0
+          Description: icmp协议端口放开
+          NicType: intranet
+  ManagedKubernetesCluster:
+    Type: 'ALIYUN::CS::ManagedKubernetesCluster'
+    Properties:
+      Name:
+        Ref: 'ALIYUN::StackName'
+      ChargeType:
+        Ref: PayType
+      Period:
+        Ref: PayPeriod
+      PeriodUnit:
+        Ref: PayPeriodUnit
+      VSwitchIds:
+        - Ref: EcsVSwitch
+      VpcId:
+        Ref: EcsVpc
+      WorkerInstanceTypes:
+        - Ref: WorkerInstanceType
+      NumOfNodes: 3
+      ClusterSpec: ack.pro.small
+      ContainerCidr:
+        Ref: PodCidr
+      ServiceCidr:
+        Ref: ServiceCidr
+      ZoneIds:
+        - Ref: ZoneId
+      SecurityGroupId:
+        Ref: EcsSecurityGroup
+      WorkerSystemDiskCategory:
+        Ref: WorkerSystemDiskCategory
+      WorkerSystemDiskSize:
+        Ref: WorkerSystemDiskSize
+      LoginPassword:
+        Ref: LoginPassword
+      SnatEntry: true
+      Addons:
+        - Name: flannel
+          Config: ''
+  ClusterApplication:
+    Type: ALIYUN::CS::ClusterApplication
+    Properties:
+      YamlContent:
+        Fn::Sub:
+          - |
+            apiVersion: v1
+            data:
+              .dockerconfigjson: {{computenest::acr::dockerconfigjson}}
+            kind: Secret
+            metadata:
+              name: docker-secret
+            type: kubernetes.io/dockerconfigjson
+            ---
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: spring-boot
+              labels:
+                app: spring-boot
+            spec:
+              replicas: 1
+              selector:
+                matchLabels:
+                  app: spring-boot
+              template:
+                metadata:
+                  labels:
+                    app: spring-boot
+                spec:
+                  containers:
+                    - name: spring-boot
+                      image: {{ computenest::acrimage::springBootDemo }}
+                  imagePullSecrets:
+                    - name: docker-secret
+            ---
+            apiVersion: v1
+            kind: Service
+            metadata:
+              annotations:
+                service.beta.kubernetes.io/alibaba-cloud-loadbalancer-id: ${LoadBalancerId}
+                service.beta.kubernetes.io/alicloud-loadbalancer-force-override-listeners: "true"
+              labels:
+                app: spring-boot
+              name: spring-boot-svc
+            spec:
+              ports:
+              - port: 8080
+                protocol: TCP
+                targetPort: 8080
+              selector:
+                app: spring-boot
+              type: LoadBalancer
+          - LoadBalancerId:
+              Fn::GetAtt:
+                - Slb
+                - LoadBalancerId
+      ClusterId:
+        Fn::GetAtt:
+          - ManagedKubernetesCluster
+          - ClusterId
+      DefaultNamespace: default
+Outputs:
+  # 将公网ip做为http返回的地址显示在控制台
+  Endpoint:
+    Description:
+      zh-cn: 对外暴露的公网IP地址
+      en: Public IP Addresses
+    Value:
+      Fn::Sub:
+        - http://${ServerAddress}:8080
+        - ServerAddress:
+            Fn::GetAtt:
+              - EipSlbAddress
+              - EipAddress
+Metadata:
+  'ALIYUN::ROS::Interface':
+    ParameterGroups:
+      - Parameters:
+          - PayType
+          - PayPeriodUnit
+          - PayPeriod
+        Label:
+          en: PayType Configuration
+          zh-cn: 付费类型配置
+      - Parameters:
+          - ZoneId
+          - VpcCidrBlock
+          - VSwitchCidrBlock
+          - LoginPassword
+        Label:
+          en: Basic Configuration
+          zh-cn: 基础配置
+      - Parameters:
+          - WorkerInstanceType
+          - WorkerSystemDiskCategory
+          - WorkerSystemDiskSize
+          - ServiceCidr
+          - PodCidr
+        Label:
+          en: Kubernetes
+          zh-cn: Kubernetes配置
+      - Parameters:
+          - LoadBalancerSpec
+        Label:
+          en: 负载均衡配置
+          zh-cn: 负载均衡配置
