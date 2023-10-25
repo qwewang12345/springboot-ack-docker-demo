@@ -32,7 +32,6 @@
 | AliyunComputeNestUserFullAccess | 管理计算巢服务（ComputeNest）的用户侧权限 |
 | AliyunComputeNestSupplierFullAccess | 管理计算巢服务（ComputeNest）的服务商侧权限 |
 
-## 服务实例计费说明
 
 ## 服务实例计费说明
 
@@ -131,7 +130,7 @@ CMD ["java", "-jar", "application.jar"]
 
 templates/template.yaml主要由三部分组成
 
-1. Parameters定义需要用户填写的参数，包括付费类型，ACK实例规格和实例密码可用区等参数
+1.Parameters定义需要用户填写的参数，包括付费类型，ACK实例规格和实例密码可用区等参数
 ```
 Parameters:
   PayType:
@@ -329,7 +328,7 @@ Parameters:
     Default: slb.s1.small
 ```
 
-2. Resources定义需要开的资源，包括新开的vpc、loadBalancer、ack集群。ALIYUN::CS::ClusterApplication资源类型会将镜像按yaml文件部署到ACK集群中，其中{{ computenest::acr::dockerconfigjson }}是下载docker所需secret的占位符，计算巢服务会在部署时替换为对应的下载秘钥。{{ computenest::acrimage::demo }} 是容器镜像仓库的占位符，计算巢服务会替换成对应的镜像仓库地址。
+2.Resources定义需要开的资源，包括新开的vpc、loadBalancer、ack集群。ALIYUN::CS::ClusterApplication资源类型会将镜像按yaml文件部署到ACK集群中，其中{{ computenest::acr::dockerconfigjson }}是下载docker所需secret的占位符，计算巢服务会在部署时替换为对应的下载秘钥。{{ computenest::acrimage::demo }} 是容器镜像仓库的占位符，计算巢服务会替换成对应的镜像仓库地址。
 ```
 Resources:
   EcsVpc:
@@ -520,7 +519,7 @@ Resources:
       DefaultNamespace: default
 ```
 
-3. Outputs定义需要最终在计算巢概览页中对用户展示的输出，展示springboot的访问地址，负载均衡地址加服务端口
+3.Outputs定义需要最终在计算巢概览页中对用户展示的输出，展示springboot的访问地址，负载均衡地址加服务端口
 ```
 Outputs:
   # 将公网ip做为http返回的地址显示在控制台
