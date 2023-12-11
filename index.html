@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <meta name="description" content="计算巢是阿里云开放给企业应用服务商的服务管理平台。服务商能够在计算巢上发布私有化部署服务，为其客户提供云上软件一键部署的能力；同时也支持全托管模式的服务，赋能服务商托管其客户资源。">
+  <title>服务模版说明文档 - Aliyun 计算巢 x Demo</title>
+
+  <link rel="shortcut icon" href="img/favicon.ico">
+
+  <link rel="stylesheet" href="https://unpkg.com/purecss@1.0.0/build/pure-min.css">
+  <link rel="stylesheet" href="css/theme.css">
+  
+
+  
+
+  
+  
+
+  
+    <script src="search/main.js"></script>
+  
+
+  
+
+  <script src="js/highlight.min.js"></script>
+  <script>hljs.highlightAll();</script>
+</head>
+
+<body>
+  <div class="container">
+    <div class="nav">
+      <div class="nav-inner">
+        <div class="logo">
+          <img src="./img/logo-2x.png">
+        </div>
+        <div class="nav-list">
+          <ul>
+          
+              <li><a href="#_1">服务模版说明文档</a></li>
+              
+                  <li><a href="#_2">服务说明</a></li>
+                  
+              
+                  <li><a href="#_3">服务架构</a></li>
+                  
+              
+                  <li><a href="#_4">服务构建计费说明</a></li>
+                  
+              
+                  <li><a href="#ram">RAM账号所需权限</a></li>
+                  
+              
+                  <li><a href="#_5">服务实例计费说明</a></li>
+                  
+              
+                  <li><a href="#_6">服务实例部署流程</a></li>
+                  
+                      <li class="li-h3"><a href="#_7">部署参数说明</a></li>
+                  
+                      <li class="li-h3"><a href="#_8">部署步骤</a></li>
+                  
+              
+                  <li><a href="#_9">服务详细说明</a></li>
+                  
+              
+                  <li><a href="#_10">其他</a></li>
+                  
+              
+          
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="content theme-github">
+      
+      <div class="content-inner">        
+        
+        <h1 id="_1">服务模版说明文档</h1>
+<h2 id="_2">服务说明</h2>
+<p>本文介绍springboot服务ack+docker版快速上手流程，本示例对应的<a href="https://github.com/aliyun-computenest/springboot-ack-docker-demo">git地址</a></p>
+<p>本示例会自动的构建计算巢服务，具体的服务构建流程为:</p>
+<ol>
+<li>构建并上传docker镜像，创建计算巢容器镜像部署物</li>
+<li>创建计算巢服务并关联容器镜像部署物</li>
+</ol>
+<p>创建过程大约持续1分钟，当服务变成待提交后构建成功</p>
+<h2 id="_3">服务架构</h2>
+<p>本部署架构为ack集群部署，将docker镜像以service的方式部署到ack集群中，通过service绑定的loadBalancer的公网ip进行访问，在本例中，service提供的对外端口为8080，和容器对外提供的端口相同。</p>
+<p><img alt="img_6.png" src="img_6.png" /></p>
+<h2 id="_4">服务构建计费说明</h2>
+<p>测试本服务构建无需任何费用，创建服务实例涉及的费用参考服务实例计费说明</p>
+<h2 id="ram">RAM账号所需权限</h2>
+<p>本服务需要对ACK、ECS、VPC等资源进行访问和创建操作，若您使用RAM用户创建服务实例，需要在创建服务实例前，对使用的RAM用户的账号添加相应资源的权限。添加RAM权限的详细操作，请参见<a href="https://help.aliyun.com/document_detail/121945.html">为RAM用户授权</a>。所需权限如下表所示。</p>
+<table>
+<thead>
+<tr>
+<th>权限策略名称</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>AliyunCSFullAccess</td>
+<td>管理容器服务(CS)的权限</td>
+</tr>
+<tr>
+<td>AliyunECSFullAccess</td>
+<td>管理云服务器服务（ECS）的权限</td>
+</tr>
+<tr>
+<td>AliyunVPCFullAccess</td>
+<td>管理专有网络（VPC）的权限</td>
+</tr>
+<tr>
+<td>AliyunROSFullAccess</td>
+<td>管理资源编排服务（ROS）的权限</td>
+</tr>
+<tr>
+<td>AliyunComputeNestUserFullAccess</td>
+<td>管理计算巢服务（ComputeNest）的用户侧权限</td>
+</tr>
+<tr>
+<td>AliyunComputeNestSupplierFullAccess</td>
+<td>管理计算巢服务（ComputeNest）的服务商侧权限</td>
+</tr>
+</tbody>
+</table>
+<h2 id="_5">服务实例计费说明</h2>
+<p>测试本服务在计算巢上的费用主要涉及：</p>
+<ul>
+<li>ack集群费用</li>
+<li>所选vCPU与内存规格</li>
+<li>系统盘类型及容量</li>
+<li>公网带宽</li>
+</ul>
+<p>计费方式包括：</p>
+<ul>
+<li>按量付费（小时）</li>
+<li>包年包月</li>
+</ul>
+<p>目前提供如下实例：</p>
+<table>
+<thead>
+<tr>
+<th>规格族</th>
+<th>vCPU与内存</th>
+<th>系统盘</th>
+<th>公网带宽</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ecs.c6.large</td>
+<td>内存型c6，2vCPU 4GiB</td>
+<td>ESSD云盘 200GiB PL0</td>
+<td>固定带宽1Mbps</td>
+</tr>
+<tr>
+<td>ecs.c6.2large</td>
+<td>内存型c6，4vCPU 8GiB</td>
+<td>ESSD云盘 200GiB PL0</td>
+<td>固定带宽1Mbps</td>
+</tr>
+</tbody>
+</table>
+<p>预估费用在创建实例时可实时看到。</p>
+<h2 id="_6">服务实例部署流程</h2>
+<h3 id="_7">部署参数说明</h3>
+<table>
+<thead>
+<tr>
+<th>参数组</th>
+<th>参数项</th>
+<th>说明</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>服务实例</td>
+<td>服务实例名称</td>
+<td>长度不超过64个字符，必须以英文字母开头，可包含数字、英文字母、短划线（-）和下划线（_）</td>
+</tr>
+<tr>
+<td></td>
+<td>地域</td>
+<td>服务实例部署的地域</td>
+</tr>
+<tr>
+<td>付费类型配置</td>
+<td>付费类型</td>
+<td>资源的计费类型：按量付费和包年包月</td>
+</tr>
+<tr>
+<td>基础配置</td>
+<td>可用区</td>
+<td>ACK集群所在可用区</td>
+</tr>
+<tr>
+<td></td>
+<td>专有网络IPv4网段</td>
+<td>VPC的ip地址段范围，创建VPC时使用</td>
+</tr>
+<tr>
+<td></td>
+<td>交换机子网网段</td>
+<td>VSwitch的ip地址段范围，必须是VPC网段的子网段</td>
+</tr>
+<tr>
+<td></td>
+<td>实例密码</td>
+<td>长度8-30，必须包含三项（大写字母、小写字母、数字、 ()`~!@#$%^&amp;*-+=&#124;{}[]:;'&lt;&gt;,.?/ 中的特殊符号）</td>
+</tr>
+<tr>
+<td>Kubernetes配置</td>
+<td>Worker节点规格</td>
+<td>ACK集群中节点使用的实例规格</td>
+</tr>
+<tr>
+<td></td>
+<td>Worker 系统盘磁盘类型</td>
+<td>ACK集群中节点使用的系统盘磁盘类型</td>
+</tr>
+<tr>
+<td></td>
+<td>Worker节点系统盘大小(GB)</td>
+<td>ACK集群中节点使用的系统盘磁盘大小</td>
+</tr>
+<tr>
+<td></td>
+<td>Service CIDR</td>
+<td>ACK集群中service可用网段，不能与 VPC 及 VPC 内已有 Kubernetes 集群使用的网段重复</td>
+</tr>
+<tr>
+<td></td>
+<td>Pod 网络 CIDR</td>
+<td>ACK集群中pod可用网段，不能与 VPC 及 VPC 内已有 Kubernetes 集群使用的网段重复</td>
+</tr>
+<tr>
+<td>负载均衡配置</td>
+<td>规格</td>
+<td>负载均衡规格</td>
+</tr>
+</tbody>
+</table>
+<h3 id="_8">部署步骤</h3>
+<ol>
+<li>部署链接
+<img alt="img.png" src="img.png" /></li>
+<li>单击部署链接，进入服务实例部署界面，根据界面提示，填写参数完成部署。
+<img alt="img_1.png" src="img_1.png" /></li>
+<li>参数填写完成后可以看到对应询价明细，确认参数后点击<strong>下一步：确认订单</strong>。
+<img alt="img_2.png" src="img_2.png" /></li>
+<li>确认订单完成后同意服务协议并点击<strong>立即创建</strong>
+    进入部署阶段。
+<img alt="img_3.png" src="img_3.png" /></li>
+<li>等待部署完成后就可以开始使用服务，进入服务实例详情点击visitUrl。
+<img alt="img_4.png" src="img_4.png" /></li>
+<li>部署结果
+<img alt="img_5.png" src="img_5.png" /></li>
+</ol>
+<h2 id="_9">服务详细说明</h2>
+<p>本文通过将<a href="https://atomgit.com/flow-example/spring-boot">代码</a>构建后，将deploy.sh和application.jar打包成package.tgz,对其中的application.jar打包成docker镜像,
+通过计算巢部署物上传为容器镜像部署物，在模版中创建ACK集群，将容器镜像部署物部署到ACK集群上。</p>
+<p>package.tgz打包为docker镜像对应的Dockerfile如下：</p>
+<pre><code>FROM centos
+
+# 更新yum源地址
+RUN cd /etc/yum.repos.d/ &amp;&amp; \
+    sed -i 's/mirrorlist/#mirrorlist/g' /etc/yum.repos.d/CentOS-* &amp;&amp; \
+    sed -i 's|#baseurl=http://mirror.centos.org|baseurl=http://vault.centos.org|g' /etc/yum.repos.d/CentOS-* &amp;&amp; \
+    yum makecache
+
+RUN yum update -y &amp;&amp; \
+    yum install -y java-1.8.0-openjdk java-1.8.0-openjdk-devel &amp;&amp; \
+    yum install -y git &amp;&amp; \
+    yum clean all &amp;&amp; \
+    cd /root &amp;&amp; \
+    git clone https://github.com/aliyun-computenest/springboot-ack-docker-demo.git &amp;&amp; \
+    mkdir -p /home/admin/application &amp;&amp; \
+    cp /root/springboot-ack-docker-demo/artifacts/package.tgz /home/admin/application &amp;&amp; \
+    cd /home/admin/application &amp;&amp; \
+    tar xvf package.tgz &amp;&amp; \
+    rm -rf /root/springboot-ack-docker-demo &amp;&amp; \
+    rm package.tgz
+WORKDIR /home/admin/application/target
+ENV JAVA_HOME /usr/lib/jvm/java-1.8.0-openjdk/
+RUN export JAVA_HOME
+EXPOSE 8080
+CMD [&quot;java&quot;, &quot;-jar&quot;, &quot;application.jar&quot;]
+</code></pre>
+<p>templates/template.yaml主要由三部分组成</p>
+<p>1.Parameters定义需要用户填写的参数，包括付费类型，ACK实例规格和实例密码可用区等参数</p>
+<pre><code>Parameters:
+  PayType:
+    Type: String
+    Label:
+      en: ECS Instance Charge Type
+      zh-cn: 付费类型
+    Default: PostPaid
+    AllowedValues:
+      - PostPaid
+      - PrePaid
+    AssociationProperty: ChargeType
+    AssociationPropertyMetadata:
+      LocaleKey: InstanceChargeType
+  PayPeriodUnit:
+    Type: String
+    Label:
+      en: Pay Period Unit
+      zh-cn: 购买资源时长周期
+    Default: Month
+    AllowedValues:
+      - Month
+      - Year
+    AssociationProperty: PayPeriodUnit
+    AssociationPropertyMetadata:
+      Visible:
+        Condition:
+          'Fn::Not':
+            'Fn::Equals':
+              - '${PayType}'
+              - PostPaid
+  PayPeriod:
+    Type: Number
+    Description:
+      en: &gt;-
+        When the resource purchase duration is Month, the value of Period ranges
+        from 1 to 9, 12, 24, 36, 48, or 60. &lt;br&gt;&lt;b&gt;&lt;font color='red'&gt; When ECS
+        instance types are PrePaid valid &lt;/b&gt;&lt;/font&gt;
+      zh-cn: &gt;-
+        当购买资源时长为Month时，Period取值：1~9 &lt;br&gt;&lt;b&gt;&lt;font
+        color='red'&gt;当ECS实例类型为PrePaid有效&lt;/b&gt;&lt;/font&gt;
+    Label:
+      en: Period
+      zh-cn: 购买资源时长
+    Default: 1
+    AllowedValues:
+      - 1
+      - 2
+      - 3
+      - 4
+      - 5
+      - 6
+      - 7
+      - 8
+      - 9
+    AssociationProperty: PayPeriod
+    AssociationPropertyMetadata:
+      Visible:
+        Condition:
+          'Fn::Not':
+            'Fn::Equals':
+              - '${PayType}'
+              - PostPaid
+  ZoneId:
+    Type: String
+    AssociationProperty: 'ALIYUN::ECS::Instance:ZoneId'
+    Label:
+      en: Zone ID
+      zh-cn: 可用区
+    Default: cn-hangzhou-h
+  VpcCidrBlock:
+    Type: String
+    Label:
+      en: VPC CIDR IPv4 Block
+      zh-cn: 专有网络IPv4网段
+    Description:
+      zh-cn: &gt;-
+        VPC的ip地址段范围，&lt;br&gt;您可以使用以下的ip地址段或其子网:&lt;br&gt;&lt;font
+        color='green'&gt;[10.0.0.0/8]&lt;/font&gt;&lt;br&gt;&lt;font
+        color='green'&gt;[172.16.0.0/12]&lt;/font&gt;&lt;br&gt;&lt;font
+        color='green'&gt;[192.168.0.0/16]&lt;/font&gt;
+      en: &gt;-
+        The ip address range of the VPC in the CidrBlock form; &lt;br&gt;You can use
+        the following ip address ranges and their subnets: &lt;br&gt;&lt;font
+        color='green'&gt;[10.0.0.0/8]&lt;/font&gt;&lt;br&gt;&lt;font
+        color='green'&gt;[172.16.0.0/12]&lt;/font&gt;&lt;br&gt;&lt;font
+        color='green'&gt;[192.168.0.0/16]&lt;/font&gt;
+    Default: 192.168.0.0/16
+    AssociationProperty: 'ALIYUN::VPC::VPC::CidrBlock'
+  VSwitchCidrBlock:
+    Type: String
+    Label:
+      en: VSwitch CIDR Block
+      zh-cn: 交换机子网网段
+    Description:
+      zh-cn: 必须属于VPC的子网段。
+      en: Must belong to the subnet segment of VPC.
+    Default: 192.168.1.0/24
+    AssociationProperty: 'ALIYUN::VPC::VSwitch::CidrBlock'
+    AssociationPropertyMetadata:
+      VpcCidrBlock: VpcCidrBlock
+  LoginPassword:
+    NoEcho: true
+    Type: String
+    Description:
+      en: &gt;-
+        Server login password, Length 8-30, must contain three(Capital letters,
+        lowercase letters, numbers, ()`~!@#$%^&amp;*_-+=|{}[]:;&lt;&gt;,.?/ Special symbol
+        in)
+      zh-cn: &gt;-
+        服务器登录密码,长度8-30，必须包含三项（大写字母、小写字母、数字、 ()`~!@#$%^&amp;*_-+=|{}[]:;&lt;&gt;,.?/
+        中的特殊符号）
+    Label:
+      en: Instance Password
+      zh-cn: 实例密码
+    ConstraintDescription:
+      en: &gt;-
+        Length 8-30, must contain three(Capital letters, lowercase letters,
+        numbers, ()`~!@#$%^&amp;*_-+=|{}[]:;&lt;&gt;,.?/ Special symbol in)
+      zh-cn: '长度8-30，必须包含三项（大写字母、小写字母、数字、 ()`~!@#$%^&amp;*_-+=|{}[]:;&lt;&gt;,.?/ 中的特殊符号）'
+    AssociationProperty: 'ALIYUN::ECS::Instance::Password'
+    AllowedPattern: '^[a-zA-Z0-9-\(\)\`\~\!\@\#\$\%\^\&amp;\*\_\-\+\=\|\{\}\[\]\:\;\&lt;\&gt;\,\.\?\/]*$'
+    MinLength: 8
+    MaxLength: 30
+    Default: computenest*12345
+  WorkerInstanceType:
+    Type: String
+    Label:
+      en: Worker Nodes Types
+      zh-cn: Worker节点规格
+    AssociationProperty: 'ALIYUN::ECS::Instance::InstanceType'
+    AssociationPropertyMetadata:
+      ZoneId: '${ZoneId}'
+    Default: ecs.g6.large
+  WorkerSystemDiskCategory:
+    Type: String
+    AllowedValues:
+      - cloud_efficiency
+      - cloud_ssd
+      - cloud_essd
+    AssociationPropertyMetadata:
+      LocaleKey: DiskCategory
+      InstanceType: '${WorkerInstanceType}'
+    Label:
+      en: Worker System Disk Category
+      zh-cn: Worker 系统盘磁盘类型
+    Default: cloud_essd
+  WorkerSystemDiskSize:
+    Type: Number
+    Label:
+      en: Worker System Disk Size(GB)
+      zh-cn: Worker节点系统盘大小(GB)
+    MinValue: 1
+    Default: 120
+  PodCidr:
+    Type: String
+    Description:
+      zh-cn: &gt;-
+        请填写有效的私有网段，即以下网段及其子网：10.0.0.0/8，172.16-31.0.0/12-16，192.168.0.0/16&lt;br&gt;不能与
+        VPC 及 VPC 内已有 Kubernetes 集群使用的网段重复。&lt;font
+        color='blue'&gt;&lt;b&gt;创建成功后不能修改&lt;/b&gt;&lt;/font&gt;
+      en: &gt;-
+        Please fill in a valid private segment, i.e. the following segments and
+        their subnets: 10.0.0.0/8, 172.16-31.0.0/12-16, 192.168.0.0/16&lt;br&gt; which
+        cannot duplicate the network segments already used by clusters in VPC
+        and VPC Kunetberes. &lt;font color='blue'&gt;&lt;b&gt;Cannot be modified after
+        successful creation&lt;/b&gt;&lt;/font&gt;
+    Label:
+      zh-cn: Pod 网络 CIDR
+      en: Pod Network CIDR
+    AssociationProperty: 'ALIYUN::CS::ManagedKubernetesCluster::PodCidr'
+    Default: 10.0.0.0/16
+  ServiceCidr:
+    Type: String
+    Description:
+      zh-cn: &gt;-
+        可选范围：10.0.0.0/16-24，172.16-31.0.0/16-24，192.168.0.0/16-24&lt;br&gt;不能与 VPC 及
+        VPC 内已有 Kubernetes 集群使用的网段重复。&lt;font color='blue'&gt;&lt;b&gt;创建成功后不能修改&lt;/b&gt;&lt;/font&gt;
+      en: &gt;-
+        Optional range: 10.0.0.0/16-24, 172.16-31.0.0/16-24,
+        192.168.0.0/16-24&lt;br&gt; cannot duplicate segments already used by existing
+        Kubernetes clusters in VPC and VPC.&lt;font color='blue'&gt;&lt;b&gt;Cannot be
+        modified after successful creation&lt;/b&gt;&lt;/font&gt;
+    Label:
+      zh-cn: Service CIDR
+      en: Service CIDR
+    AssociationProperty: 'ALIYUN::CS::ManagedKubernetesCluster::ServiceCidr'
+    Default: 172.16.0.0/16
+  LoadBalancerSpec:
+    Type: String
+    AssociationProperty: ALIYUN::SLB::Instance::InstanceType
+    Label:
+      en: Specifications
+      zh-cn: 规格
+    Default: slb.s1.small
+</code></pre>
+<p>2.Resources定义需要开的资源，包括新开的vpc、loadBalancer、ack集群。ALIYUN::CS::ClusterApplication资源类型会将镜像按yaml文件部署到ACK集群中，其中{{ computenest::acr::dockerconfigjson }}是下载docker所需secret的占位符，计算巢服务会在部署时替换为对应的下载秘钥。{{ computenest::acrimage::demo }} 是容器镜像仓库的占位符，计算巢服务会替换成对应的镜像仓库地址。</p>
+<pre><code>Resources:
+  EcsVpc:
+    Type: 'ALIYUN::ECS::VPC'
+    Properties:
+      VpcName:
+        Ref: 'ALIYUN::StackName'
+      CidrBlock:
+        Ref: VpcCidrBlock
+  EcsVSwitch:
+    Type: 'ALIYUN::ECS::VSwitch'
+    Properties:
+      VSwitchName:
+        Ref: 'ALIYUN::StackName'
+      VpcId:
+        Ref: EcsVpc
+      ZoneId:
+        Ref: ZoneId
+      CidrBlock:
+        Ref: VSwitchCidrBlock
+  # 新建负载均衡
+  Slb:
+    Type: ALIYUN::SLB::LoadBalancer
+    Properties:
+      LoadBalancerName:
+        Ref: ALIYUN::StackName
+      PayType:
+        Ref: PayType
+      PricingCycle:
+        Ref: PayPeriodUnit
+      Duration:
+        Ref: PayPeriod
+      VpcId:
+        Ref: EcsVpc
+      VSwitchId:
+        Ref: EcsVSwitch
+      LoadBalancerSpec:
+        Ref: LoadBalancerSpec
+      AddressType: intranet
+  # 新建eip
+  EipSlbAddress:
+    Type: ALIYUN::VPC::EIP
+    Properties:
+      Name:
+        Ref: ALIYUN::StackName
+      InternetChargeType: PayByTraffic
+      Bandwidth: 100
+  # 绑定eip到负载均衡
+  EipSlbAddressAssociation:
+    Type: ALIYUN::VPC::EIPAssociation
+    Properties:
+      InstanceId:
+        Ref: Slb
+      AllocationId:
+        Ref: EipSlbAddress
+  EcsSecurityGroup:
+    Type: 'ALIYUN::ECS::SecurityGroup'
+    Properties:
+      SecurityGroupName:
+        Ref: 'ALIYUN::StackName'
+      VpcId:
+        Ref: EcsVpc
+      SecurityGroupEgress:
+        - PortRange: '-1/-1'
+          Priority: 1
+          IpProtocol: all
+          DestCidrIp: 0.0.0.0/0
+          NicType: intranet
+      SecurityGroupIngress:
+        - PortRange: '-1/-1'
+          Priority: 1
+          IpProtocol: all
+          SourceCidrIp:
+            Ref: PodCidr
+          Description: pod网络访问开放
+          NicType: intranet
+        - PortRange: '-1/-1'
+          Priority: 1
+          IpProtocol: all
+          SourceCidrIp:
+            Ref: VpcCidrBlock
+          Description: vpc网络访问开放
+          NicType: intranet
+        - PortRange: '-1/-1'
+          Priority: 1
+          IpProtocol: icmp
+          SourceCidrIp: 0.0.0.0/0
+          Description: icmp协议端口放开
+          NicType: intranet
+  ManagedKubernetesCluster:
+    Type: 'ALIYUN::CS::ManagedKubernetesCluster'
+    Properties:
+      Name:
+        Ref: 'ALIYUN::StackName'
+      ChargeType:
+        Ref: PayType
+      Period:
+        Ref: PayPeriod
+      PeriodUnit:
+        Ref: PayPeriodUnit
+      VSwitchIds:
+        - Ref: EcsVSwitch
+      VpcId:
+        Ref: EcsVpc
+      WorkerInstanceTypes:
+        - Ref: WorkerInstanceType
+      NumOfNodes: 3
+      ClusterSpec: ack.pro.small
+      ContainerCidr:
+        Ref: PodCidr
+      ServiceCidr:
+        Ref: ServiceCidr
+      ZoneIds:
+        - Ref: ZoneId
+      SecurityGroupId:
+        Ref: EcsSecurityGroup
+      WorkerSystemDiskCategory:
+        Ref: WorkerSystemDiskCategory
+      WorkerSystemDiskSize:
+        Ref: WorkerSystemDiskSize
+      LoginPassword:
+        Ref: LoginPassword
+      SnatEntry: true
+      Addons:
+        - Name: flannel
+          Config: ''
+  ClusterApplication:
+    Type: ALIYUN::CS::ClusterApplication
+    Properties:
+      YamlContent:
+        Fn::Sub:
+          - |
+            apiVersion: v1
+            data:
+              .dockerconfigjson: {{computenest::acr::dockerconfigjson}}
+            kind: Secret
+            metadata:
+              name: docker-secret
+            type: kubernetes.io/dockerconfigjson
+            ---
+            apiVersion: apps/v1
+            kind: Deployment
+            metadata:
+              name: spring-boot
+              labels:
+                app: spring-boot
+            spec:
+              replicas: 1
+              selector:
+                matchLabels:
+                  app: spring-boot
+              template:
+                metadata:
+                  labels:
+                    app: spring-boot
+                spec:
+                  containers:
+                    - name: spring-boot
+                      image: {{ computenest::acrimage::springBootDemo }}
+                  imagePullSecrets:
+                    - name: docker-secret
+            ---
+            apiVersion: v1
+            kind: Service
+            metadata:
+              annotations:
+                service.beta.kubernetes.io/alibaba-cloud-loadbalancer-id: ${LoadBalancerId}
+                service.beta.kubernetes.io/alicloud-loadbalancer-force-override-listeners: &quot;true&quot;
+              labels:
+                app: spring-boot
+              name: spring-boot-svc
+            spec:
+              ports:
+              - port: 8080
+                protocol: TCP
+                targetPort: 8080
+              selector:
+                app: spring-boot
+              type: LoadBalancer
+          - LoadBalancerId:
+              Fn::GetAtt:
+                - Slb
+                - LoadBalancerId
+      ClusterId:
+        Fn::GetAtt:
+          - ManagedKubernetesCluster
+          - ClusterId
+      DefaultNamespace: default
+</code></pre>
+<p>3.Outputs定义需要最终在计算巢概览页中对用户展示的输出，展示springboot的访问地址，负载均衡地址加服务端口</p>
+<pre><code>Outputs:
+  # 将公网ip做为http返回的地址显示在控制台
+  Endpoint:
+    Description:
+      zh-cn: 对外暴露的公网IP地址
+      en: Public IP Addresses
+    Value:
+      Fn::Sub:
+        - http://${ServerAddress}:8080
+        - ServerAddress:
+            Fn::GetAtt:
+              - EipSlbAddress
+              - EipAddress
+</code></pre>
+<h2 id="_10">其他</h2>
+<p><a href="https://atomgit.com/flow-example/spring-boot">实例代码源地址</a></p>
+<p><a href="https://help.aliyun.com/document_detail/153848.html">软件包package.tgz构建流程参考</a></p>
+        
+      </div>
+
+      <div class="copyrights">© 2009-2022 Aliyun.com 版权所有</div>
+    </div>
+  </div>
+  
+  <!--
+  MkDocs version      : 1.5.3
+  Docs Build Date UTC : 2023-12-11 10:15:18.214964+00:00
+  -->
+</body>
+</html>
